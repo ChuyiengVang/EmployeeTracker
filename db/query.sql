@@ -1,1 +1,1 @@
-SELECT de
+SELECT 
