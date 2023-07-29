@@ -5,6 +5,7 @@ const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
+require('dotenv').config()
 
 //express middleware
 app.use(express.urlencoded({ extended: false }));
@@ -24,6 +25,16 @@ const db = mysql.createConnection(
 
 );
 
+function viewAllDepartments() {
+
+    db.query(`SELECT * FROM department`, function (err, result) {
+
+        console.log(result);
+
+    });
+
+}
+
 inquirer.prompt([
 
     {
@@ -35,14 +46,10 @@ inquirer.prompt([
 
 ]).then((answer) => {
 
-    if(answer === 'view all departments') {
+    if(answer.startingChoices === 'view all departments') {
 
-        db.query(`SELECT * FROM department`, function (err, results) {
-
-            console.log(results);
-            return prompt();
-
-        });
+        viewAllDepartments();
+        return prompt();
     }
 });
 
