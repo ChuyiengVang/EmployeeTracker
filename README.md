@@ -1,5 +1,11 @@
 # EmployeeTracker
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A command-line application used to manage your company's employee database
+
+![image](https://github.com/ChuyiengVang/EmployeeTracker/assets/124082784/6646f9f9-ad89-4054-b642-c743b98708cc)
+
 # About
 
 Developers frequently have to create interfaces that allow non-developers to easily view and interact with information stored in databases. These interfaces are called **content management systems (CMS)**. Your assignment this week is to build a command-line application from scratch to manage a company's employee database, using Node.js, Inquirer, and MySQL.
@@ -33,3 +39,25 @@ THEN I am prompted to enter the employee’s first name, last name, role, and ma
 WHEN I choose to update an employee role
 THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
 ```
+
+## Usage
+
+  link to video the application being used
+https://drive.google.com/file/d/1S3p_QEmXsCUNHFS5nf3cvMkDwQ7hZGze/view
+
+## License
+
+  License used: MIT
+
+  For more information about the license please visit [https: //choosealicense.com/](https://choosealicense.com/)
+
+## Contributing
+  
+  fork my project, create a new feature branch and commit when done
+
+## Question
+
+  You may contact me with ny questions at:
+  
+  Email: [chuyieng@gmail.com	](chuyieng@gmail.com	)<br>
+  Github: [github.com/ChuyiengVang](https://github.com/ChuyiengVang)
