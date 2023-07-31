@@ -1,17 +1,8 @@
-// Import packages
-const express = require('express');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 
-const PORT = process.env.PORT || 3001;
-const app = express();
-require('dotenv').config()
+require('dotenv').config();
 
-//express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-// Connects to database
 const db = mysql.createConnection(
 
     {
@@ -27,9 +18,9 @@ const db = mysql.createConnection(
 
 function viewAllDepartments() {
 
-    db.query(`SELECT * FROM department`, function (err, result) {
+    db.query(`SELECT department.id, department.department_name FROM department`, function(err, result) {
 
-        console.log(result);
+        console.table(result);
         return primaryPrompt();
 
     });
@@ -66,7 +57,7 @@ function addDepartment() {
             if(err) {
                 console.log(err);
             } else{
-                viewAllDepartments();
+                console.log('New department added!!!');
             }
 
         });
@@ -78,9 +69,9 @@ function addDepartment() {
 
 function viewAllJobs() {
 
-    db.query(`SELECT * FROM job`, function (err, result) {
+    db.query(`SELECT job.id, job.title, department.department_name, job.salary FROM job JOIN department ON job.department_id = department.id `, function(err, result) {
 
-        console.log(result);
+        console.table(result);
         return primaryPrompt();
 
     });
@@ -88,7 +79,12 @@ function viewAllJobs() {
 
 function addJob() {
 
+    db.query(`SELECT job.id, job.title, department.department_name, job.salary FROM job JOIN department ON job.department_id = department.id`, function(err, result) {
+
+        console.table(result);
+
     inquirer.prompt([
+
         {
             type: 'input',
             message: 'What is the name of the job?',
@@ -114,7 +110,7 @@ function addJob() {
                 const message = `
                 Please enter job salary!!!`;
 
-                if (data.length < 1) {
+                if (data.length < 4) {
                     console.log(message);
                 } else { 
                     return true
@@ -122,14 +118,117 @@ function addJob() {
             }
         },
         {
-            type: 'list',
-            message: 'Which department does the job belong to?',
-            name: 'department',
-            choices: ''
+            type: 'input',
+            message: 'Which department id does the job belong to?',
+            name: 'department'
         },
-    ])
+    ]).then((answer) => {
+
+        db.query(`INSERT INTO job (title, salary, department_id) VALUES(?,?,?)`, [answer.addJob, answer.jobSalary, answer.department], (err, result) => {
+
+            if(err) {
+                console.log(err);
+            } else {
+                console.log('New job listed');
+            }
+
+        });
+
+        primaryPrompt()
+
+    });
+    }); 
+};
+
+function viewEmployees() {
+
+    db.query(`SELECT employee.id, employee.first_name, employee.last_name, job.title, department.department_name, job.salary, employee.manager_id FROM employee JOIN job ON employee.job_id = job.id JOIN department ON job.department_id = department.id ORDER BY employee.id ASC`, function(err, result) {
+
+        console.table(result);
+        return primaryPrompt();
+
+    });
 
 };
+
+function addEmployee() {
+
+    db.query(`SELECT * FROM job`, function(err, result) {
+
+        console.table(result);
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                message: 'What is the employees first name?',
+                name: 'firstName'
+            },
+            {
+                type: 'input',
+                message: 'What is the employees last name?',
+                name: 'lastName'
+            },
+            {
+                type: 'input',
+                message: 'What is their job id?',
+                name: 'job'
+            },
+            {
+                type: 'input',
+                message: 'What is their manager id?',
+                name: 'manager'
+            },
+        ]).then((answer) => {
+
+            db.query(`INSERT INTO employee (first_name, last_name, job_id, manager_id) VALUES(?, ?, ?, ?)`, [answer.firstName, answer.lastName, answer.job, answer.manager], (err, result) => {
+
+                if(err) {
+                    console.log(err);
+                } else {
+                    console.log('New employee added!!!');
+                }
+            });
+
+            primaryPrompt();
+
+        })
+    })
+};
+
+function updateEmployee() {
+
+    db.query(`SELECT * FROM employee`, function (err, result) {
+
+        console.table(result);
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                message: 'Id of the employee you want to update?',
+                name: 'firstName'
+            },
+            {
+                type: 'input',
+                message: 'Which job id do you want to assign the selected employee?',
+                name: 'job'
+            }
+        ]).then((answer) => {
+
+            db.query(`UPDATE employee SET job_id = ? WHERE id = ?`, [answer.job, answer.firstName], (err, result) => {
+
+                if(err) {
+                    console.log(err);
+                } else {
+                    console.log('Employee job updated!!!');
+                };
+
+            });
+
+            primaryPrompt();
+            
+        });
+    })
+}
 
 function primaryPrompt() {
 
@@ -139,7 +238,7 @@ inquirer.prompt([
         type: 'list',
         message: 'What would you like to do?',
         name: 'startingChoices',
-        choices: ['view all departments','add departmet', 'view all jobs', 'add job', 'view all employees', 'add employee job', 'update an employee job']
+        choices: ['view all departments','add department', 'view all jobs', 'add job', 'view all employees', 'add an employee', 'update an employee job']
     },
 
 ]).then((answer) => {
@@ -149,7 +248,7 @@ inquirer.prompt([
         viewAllDepartments();
 
         
-    } else if (answer.startingChoices === 'add departmet') {
+    } else if (answer.startingChoices === 'add department') {
 
         addDepartment();
 
@@ -161,12 +260,20 @@ inquirer.prompt([
 
         addJob();
 
-    }
+    } else if (answer.startingChoices === 'view all employees') {
+
+        viewEmployees()
+
+    } else if (answer.startingChoices === 'add an employee') {
+
+        addEmployee()
+
+    } else if(answer.startingChoices === 'update an employee job') {
+
+        updateEmployee()
+
+    };
 });
 };
 
 primaryPrompt();
-
-// find way to query ADD/DELETE into inquirer
-// find way to show schema tables
-//
